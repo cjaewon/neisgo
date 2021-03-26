@@ -59,10 +59,11 @@ func (n *Neis) GetMeal(t ...time.Time) (*[]Meal, error) {
 		"KEY":                []string{n.apiKey},
 		"Type":               []string{"json"},
 		"ATPT_OFCDC_SC_CODE": []string{n.region},
-		"SD_SCHUL_CODE":      []string{n.schoolCode},
+		"SD_SCHUL_CODE":      []string{n.code},
 	}
 
 	url := fmt.Sprintf("https://open.neis.go.kr/hub/mealServiceDietInfo?%s", queryParams.Encode())
+
 	resp, err := http.Get(url)
 	if err != nil {
 		return nil, err
@@ -81,7 +82,7 @@ func (n *Neis) GetMeal(t ...time.Time) (*[]Meal, error) {
 	}
 
 	for _, row := range data.Mealservicedietinfo[1].Row {
-		t, err := time.Parse("20060102", row.MlsvYmd)
+		d, err := time.Parse("20060102", row.MlsvYmd)
 		if err != nil {
 			return nil, err
 		}
@@ -89,7 +90,7 @@ func (n *Neis) GetMeal(t ...time.Time) (*[]Meal, error) {
 		meals = append(meals, Meal{
 			EducationCenter: row.AtptOfcdcScCode,
 			SchoolName:      row.SchulNm,
-			Date:            t,
+			Date:            d,
 			Text:            row.DdishNm,
 			Type:            row.MmealScNm,
 			Origin:          row.OrplcInfo,

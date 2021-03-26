@@ -1,3 +1,3 @@
-module neisgo
+module github.com/cjaewon/neisgo
 
 go 1.16

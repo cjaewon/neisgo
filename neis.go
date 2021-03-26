@@ -1,13 +1,10 @@
 package neisgo
 
-import "errors"
-
 type Neis struct {
 	apiKey string
 
-	code       string
-	region     string
-	schoolCode string
+	code   string
+	region string
 }
 
 // New creates a Neis instance
@@ -20,14 +17,7 @@ func New(apiKey string) *Neis {
 }
 
 // Set sets a school which will use
-func (n *Neis) SetSchool(code string) error {
-	if len(code) < 10 {
-		return errors.New("invalid code was provided")
-	}
-
+func (n *Neis) Set(region, code string) {
 	n.code = code
-	n.region = code[0:3]
-	n.schoolCode = code[3:]
-
-	return nil
+	n.region = region
 }

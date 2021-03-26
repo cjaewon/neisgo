@@ -12,7 +12,7 @@ const (
 
 func TestGetMeal(t *testing.T) {
 	neis := neisgo.New(apiKey)
-	neis.SetSchool("T109296071")
+	neis.Set("T10", "9296071")
 
 	today := time.Now()
 	tomorrow := time.Now().AddDate(0, 0, 1)
