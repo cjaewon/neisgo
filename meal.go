@@ -2,7 +2,6 @@ package neisgo
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -50,16 +49,14 @@ type MealSchema struct {
 }
 
 // GetMeal getes meal data from neis
-func (n *Neis) GetMeal(t ...time.Time) (*[]Meal, error) {
-	if len(t) <= 0 {
-		return nil, errors.New("missing time parameters")
-	}
-
+func (n *Neis) GetMeal(start, end time.Time) (*[]Meal, error) {
 	queryParams := url.Values{
 		"KEY":                []string{n.apiKey},
 		"Type":               []string{"json"},
 		"ATPT_OFCDC_SC_CODE": []string{n.region},
 		"SD_SCHUL_CODE":      []string{n.code},
+		"MLSV_FROM_YMD":      []string{start.Format("20060102")},
+		"MLSV_TO_YMD":        []string{end.Format("20060102")},
 	}
 
 	url := fmt.Sprintf("https://open.neis.go.kr/hub/mealServiceDietInfo?%s", queryParams.Encode())
@@ -74,8 +71,10 @@ func (n *Neis) GetMeal(t ...time.Time) (*[]Meal, error) {
 		return nil, err
 	}
 
+	duration := int(end.Sub(start).Hours() / 24)
+
 	var data MealSchema
-	var meals []Meal
+	var meals = make([]Meal, duration)
 
 	if err := json.Unmarshal(b, &data); err != nil {
 		return nil, err
@@ -87,7 +86,10 @@ func (n *Neis) GetMeal(t ...time.Time) (*[]Meal, error) {
 			return nil, err
 		}
 
-		meals = append(meals, Meal{
+		first := time.Date(d.Year(), d.Month(), 1, 0, 0, 0, 0, d.Location())
+		index := (d.Day() - start.Day()) + (int(d.Month())-int(start.Month()))*first.AddDate(0, 1, -1).Day()
+
+		meals[index] = Meal{
 			EducationCenter: row.AtptOfcdcScCode,
 			SchoolName:      row.SchulNm,
 			Date:            d,
@@ -95,7 +97,7 @@ func (n *Neis) GetMeal(t ...time.Time) (*[]Meal, error) {
 			Type:            row.MmealScNm,
 			Origin:          row.OrplcInfo,
 			Ingredients:     row.NtrInfo,
-		})
+		}
 	}
 
 	return &meals, nil

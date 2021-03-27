@@ -1,9 +1,10 @@
 package neisgo_test
 
 import (
-	"neisgo"
 	"testing"
 	"time"
+
+	"github.com/cjaewon/neisgo"
 )
 
 const (
@@ -12,10 +13,10 @@ const (
 
 func TestGetMeal(t *testing.T) {
 	neis := neisgo.New(apiKey)
-	neis.Set("T10", "9296071")
+	neis.Set("", "")
 
 	today := time.Now()
-	tomorrow := time.Now().AddDate(0, 0, 1)
+	tomorrow := time.Now().AddDate(0, 0, 10)
 
 	meals, err := neis.GetMeal(today, tomorrow)
 	if err != nil {
