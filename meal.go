@@ -6,18 +6,19 @@ import (
 	"io"
 	"net/http"
 	"net/url"
+	"reflect"
 	"time"
 )
 
 type Meal struct {
 	EducationCenter string
 	SchoolName      string
-
-	Date        time.Time
-	Text        string
-	Type        string
-	Origin      string
-	Ingredients string
+	Date            time.Time
+	Origin          string
+	Ingredients     string
+	Breakfast       string
+	Lunch           string
+	Dinner          string
 }
 
 type MealSchema struct {
@@ -60,7 +61,6 @@ func (n *Neis) GetMeal(start, end time.Time) (*[]Meal, error) {
 	}
 
 	url := fmt.Sprintf("https://open.neis.go.kr/hub/mealServiceDietInfo?%s", queryParams.Encode())
-
 	resp, err := http.Get(url)
 	if err != nil {
 		return nil, err
@@ -89,14 +89,23 @@ func (n *Neis) GetMeal(start, end time.Time) (*[]Meal, error) {
 		first := time.Date(d.Year(), d.Month(), 1, 0, 0, 0, 0, d.Location())
 		index := (d.Day() - start.Day()) + (int(d.Month())-int(start.Month()))*first.AddDate(0, 1, -1).Day()
 
-		meals[index] = Meal{
-			EducationCenter: row.AtptOfcdcScCode,
-			SchoolName:      row.SchulNm,
-			Date:            d,
-			Text:            row.DdishNm,
-			Type:            row.MmealScNm,
-			Origin:          row.OrplcInfo,
-			Ingredients:     row.NtrInfo,
+		if reflect.ValueOf(meals[index]).IsZero() {
+			meals[index] = Meal{
+				EducationCenter: row.AtptOfcdcScCode,
+				SchoolName:      row.SchulNm,
+				Date:            d,
+				Origin:          row.OrplcInfo,
+				Ingredients:     row.NtrInfo,
+			}
+		}
+
+		switch row.MmealScCode {
+		case "1":
+			meals[index].Breakfast = row.DdishNm
+		case "2":
+			meals[index].Lunch = row.DdishNm
+		case "3":
+			meals[index].Dinner = row.DdishNm
 		}
 	}
 

@@ -13,10 +13,10 @@ const (
 
 func TestGetMeal(t *testing.T) {
 	neis := neisgo.New(apiKey)
-	neis.Set("", "")
+	neis.Set("T10", "9296071")
 
 	today := time.Now()
-	tomorrow := time.Now().AddDate(0, 0, 10)
+	tomorrow := time.Now().AddDate(0, 0, 5)
 
 	meals, err := neis.GetMeal(today, tomorrow)
 	if err != nil {
