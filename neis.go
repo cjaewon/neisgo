@@ -5,9 +5,6 @@ type Neis struct {
 
 	code   string
 	region string
-
-	MealTmpl     string
-	CalendarTmpl string
 }
 
 // New creates a Neis instance

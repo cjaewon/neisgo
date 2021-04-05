@@ -43,6 +43,7 @@ type Meal struct {
 	MealTime
 }
 
+// Text merges breakfast, lunch and dinner with a provided or default template
 func (m *Meal) Text() (string, error) {
 	tmpl := template.New("meal")
 
@@ -110,7 +111,7 @@ func (n *Neis) GetMeal(start, end time.Time) ([]Meal, error) {
 		return nil, err
 	}
 
-	duration := int(end.Sub(start).Hours() / 24)
+	duration := int(end.Sub(start).Hours()/24) + 1
 
 	var data mealSchema
 	var meals = make([]Meal, duration)

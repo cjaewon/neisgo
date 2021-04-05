@@ -16,7 +16,7 @@ func TestGetMeal(t *testing.T) {
 	neis.Set("T10", "9296071")
 
 	today := time.Now()
-	tomorrow := time.Now().AddDate(0, 0, 5)
+	tomorrow := time.Now().AddDate(0, 0, 10)
 
 	meals, err := neis.GetMeal(today, tomorrow)
 	if err != nil {
