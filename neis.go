@@ -16,21 +16,6 @@ func New(apiKey string) *Neis {
 		apiKey: apiKey,
 	}
 
-	n.MealTmpl = `
-{{ if .Breakfast }}
-[조식]
-{{ .Breakfast }}
-{{ end }}
-{{ if .Lunch }}
-[중식]
-{{ .Lunch }}
-{{ end }}
-{{ if .Dinner }}
-[석식]
-{{ .Dinner }}
-{{ end }}
-`
-
 	return &n
 }
 

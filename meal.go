@@ -1,8 +1,10 @@
 package neisgo
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
+	"html/template"
 	"io"
 	"net/http"
 	"net/url"
@@ -10,18 +12,54 @@ import (
 	"time"
 )
 
+const (
+	mealTmpl = `
+{{ if .Breakfast }}
+[조식]
+{{ .Breakfast }}
+{{ end }}
+{{ if .Lunch }}
+[중식]
+{{ .Lunch }}
+{{ end }}
+{{ if .Dinner }}
+[석식]
+{{ .Dinner }}
+{{ end }}`
+)
+
+type MealTime struct {
+	Breakfast string
+	Lunch     string
+	Dinner    string
+}
+
 type Meal struct {
 	EducationCenter string
 	SchoolName      string
 	Date            time.Time
-	Origin          string
-	Ingredients     string
-	Breakfast       string
-	Lunch           string
-	Dinner          string
+	Origin          MealTime
+	Ingredients     MealTime
+	MealTime
 }
 
-type MealSchema struct {
+func (m *Meal) Text() (string, error) {
+	tmpl := template.New("meal")
+
+	tmpl, err := tmpl.Parse(mealTmpl)
+	if err != nil {
+		return "", err
+	}
+
+	b := bytes.NewBufferString("")
+	if err := tmpl.Execute(b, m); err != nil {
+		return "", err
+	}
+
+	return b.String(), nil
+}
+
+type mealSchema struct {
 	Mealservicedietinfo []struct {
 		Head []struct {
 			ListTotalCount int `json:"list_total_count,omitempty"`
@@ -49,8 +87,9 @@ type MealSchema struct {
 	} `json:"mealServiceDietInfo"`
 }
 
-// GetMeal getes meal data from neis
-func (n *Neis) GetMeal(start, end time.Time) (*[]Meal, error) {
+// GetMeal gets meal data from neis
+// returns Meal type array of start to end date duration length
+func (n *Neis) GetMeal(start, end time.Time) ([]Meal, error) {
 	queryParams := url.Values{
 		"KEY":                []string{n.apiKey},
 		"Type":               []string{"json"},
@@ -73,7 +112,7 @@ func (n *Neis) GetMeal(start, end time.Time) (*[]Meal, error) {
 
 	duration := int(end.Sub(start).Hours() / 24)
 
-	var data MealSchema
+	var data mealSchema
 	var meals = make([]Meal, duration)
 
 	if err := json.Unmarshal(b, &data); err != nil {
@@ -94,20 +133,24 @@ func (n *Neis) GetMeal(start, end time.Time) (*[]Meal, error) {
 				EducationCenter: row.AtptOfcdcScCode,
 				SchoolName:      row.SchulNm,
 				Date:            d,
-				Origin:          row.OrplcInfo,
-				Ingredients:     row.NtrInfo,
 			}
 		}
 
 		switch row.MmealScCode {
 		case "1":
 			meals[index].Breakfast = row.DdishNm
+			meals[index].Origin.Breakfast = row.OrplcInfo
+			meals[index].Ingredients.Breakfast = row.NtrInfo
 		case "2":
 			meals[index].Lunch = row.DdishNm
+			meals[index].Origin.Lunch = row.OrplcInfo
+			meals[index].Ingredients.Lunch = row.NtrInfo
 		case "3":
 			meals[index].Dinner = row.DdishNm
+			meals[index].Origin.Dinner = row.OrplcInfo
+			meals[index].Ingredients.Dinner = row.NtrInfo
 		}
 	}
 
-	return &meals, nil
+	return meals, nil
 }
