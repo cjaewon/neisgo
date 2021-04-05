@@ -35,11 +35,9 @@ type MealTime struct {
 }
 
 type Meal struct {
-	EducationCenter string
-	SchoolName      string
-	Date            time.Time
-	Origin          MealTime
-	Ingredients     MealTime
+	Date        time.Time
+	Origin      MealTime
+	Ingredients MealTime
 	MealTime
 }
 
@@ -90,8 +88,8 @@ type mealSchema struct {
 
 // GetMeal gets meal data from neis
 // returns Meal type array of start to end date duration length
-func (n *Neis) GetMeal(start, end time.Time) ([]Meal, error) {
-	queryParams := url.Values{
+func (n *Neis) GetMeal(start, end time.Time) ([]*Meal, error) {
+	q := url.Values{
 		"KEY":                []string{n.apiKey},
 		"Type":               []string{"json"},
 		"ATPT_OFCDC_SC_CODE": []string{n.region},
@@ -100,11 +98,14 @@ func (n *Neis) GetMeal(start, end time.Time) ([]Meal, error) {
 		"MLSV_TO_YMD":        []string{end.Format("20060102")},
 	}
 
-	url := fmt.Sprintf("https://open.neis.go.kr/hub/mealServiceDietInfo?%s", queryParams.Encode())
+	url := fmt.Sprintf("https://open.neis.go.kr/hub/mealServiceDietInfo?%s", q.Encode())
+
 	resp, err := http.Get(url)
 	if err != nil {
 		return nil, err
 	}
+
+	defer resp.Body.Close()
 
 	b, err := io.ReadAll(resp.Body)
 	if err != nil {
@@ -114,7 +115,7 @@ func (n *Neis) GetMeal(start, end time.Time) ([]Meal, error) {
 	duration := int(end.Sub(start).Hours()/24) + 1
 
 	var data mealSchema
-	var meals = make([]Meal, duration)
+	var meals = make([]*Meal, duration)
 
 	if err := json.Unmarshal(b, &data); err != nil {
 		return nil, err
@@ -130,10 +131,8 @@ func (n *Neis) GetMeal(start, end time.Time) ([]Meal, error) {
 		index := (d.Day() - start.Day()) + (int(d.Month())-int(start.Month()))*first.AddDate(0, 1, -1).Day()
 
 		if reflect.ValueOf(meals[index]).IsZero() {
-			meals[index] = Meal{
-				EducationCenter: row.AtptOfcdcScCode,
-				SchoolName:      row.SchulNm,
-				Date:            d,
+			meals[index] = &Meal{
+				Date: d,
 			}
 		}
 
