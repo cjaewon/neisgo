@@ -56,7 +56,11 @@ type calendarSchema struct {
 	} `json:"SchoolSchedule"`
 }
 
-func (n *Neis) GetCalendar(start, end time.Time) ([]Calendar, error) {
+func (n *Neis) GetCalendar(year int, month time.Month) ([]Calendar, error) {
+	start := time.Date(year, month, 1, 0, 0, 0, 0, time.Now().Location())
+	end := time.Date(year, month+1, 0, 0, 0, 0, 0, time.Now().Location())
+	duration := int(end.Sub(start).Hours()/24) + 1
+
 	q := url.Values{
 		"KEY":                []string{n.apiKey},
 		"Type":               []string{"json"},
@@ -79,8 +83,6 @@ func (n *Neis) GetCalendar(start, end time.Time) ([]Calendar, error) {
 	if err != nil {
 		return nil, err
 	}
-
-	duration := int(end.Sub(start).Hours()/24) + 1
 
 	var data calendarSchema
 	var calendars = make([]Calendar, duration)
