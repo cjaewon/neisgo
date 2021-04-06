@@ -13,12 +13,18 @@ import (
 type Calendar struct {
 	Date time.Time
 	Name string
+
 	// Content is usually blank
 	Content string
 
+	// ClassTime represents night class or day class
+	ClassTime string
+
+	// Deduction represents class deduction
+	Deduction string
+
 	// Target is targeting school year of calendar
 	// if high school or middle school, then max length will 3 else 6
-	// Target 은 해당 일정이 대상으로하고 있는 학년을 나타냅니다.
 	Target [6]bool
 }
 
@@ -45,24 +51,24 @@ type calendarSchema struct {
 			} `json:"RESULT,omitempty"`
 		} `json:"head,omitempty"`
 		Row []struct {
-			AtptOfcdcScCode   string      `json:"ATPT_OFCDC_SC_CODE"`
-			AtptOfcdcScNm     string      `json:"ATPT_OFCDC_SC_NM"`
-			SdSchulCode       string      `json:"SD_SCHUL_CODE"`
-			SchulNm           string      `json:"SCHUL_NM"`
-			Ay                string      `json:"AY"`
-			DghtCrseScNm      interface{} `json:"DGHT_CRSE_SC_NM"`
-			SchulCrseScNm     string      `json:"SCHUL_CRSE_SC_NM"`
-			SbtrDdScNm        string      `json:"SBTR_DD_SC_NM"`
-			AaYmd             string      `json:"AA_YMD"`
-			EventNm           string      `json:"EVENT_NM"`
-			EventCntnt        string      `json:"EVENT_CNTNT"`
-			OneGradeEventYn   string      `json:"ONE_GRADE_EVENT_YN"`
-			TwGradeEventYn    string      `json:"TW_GRADE_EVENT_YN"`
-			ThreeGradeEventYn string      `json:"THREE_GRADE_EVENT_YN"`
-			FrGradeEventYn    string      `json:"FR_GRADE_EVENT_YN"`
-			FivGradeEventYn   string      `json:"FIV_GRADE_EVENT_YN"`
-			SixGradeEventYn   string      `json:"SIX_GRADE_EVENT_YN"`
-			LoadDtm           string      `json:"LOAD_DTM"`
+			AtptOfcdcScCode   string `json:"ATPT_OFCDC_SC_CODE"`
+			AtptOfcdcScNm     string `json:"ATPT_OFCDC_SC_NM"`
+			SdSchulCode       string `json:"SD_SCHUL_CODE"`
+			SchulNm           string `json:"SCHUL_NM"`
+			Ay                string `json:"AY"`
+			DghtCrseScNm      string `json:"DGHT_CRSE_SC_NM"`
+			SchulCrseScNm     string `json:"SCHUL_CRSE_SC_NM"`
+			SbtrDdScNm        string `json:"SBTR_DD_SC_NM"`
+			AaYmd             string `json:"AA_YMD"`
+			EventNm           string `json:"EVENT_NM"`
+			EventCntnt        string `json:"EVENT_CNTNT"`
+			OneGradeEventYn   string `json:"ONE_GRADE_EVENT_YN"`
+			TwGradeEventYn    string `json:"TW_GRADE_EVENT_YN"`
+			ThreeGradeEventYn string `json:"THREE_GRADE_EVENT_YN"`
+			FrGradeEventYn    string `json:"FR_GRADE_EVENT_YN"`
+			FivGradeEventYn   string `json:"FIV_GRADE_EVENT_YN"`
+			SixGradeEventYn   string `json:"SIX_GRADE_EVENT_YN"`
+			LoadDtm           string `json:"LOAD_DTM"`
 		} `json:"row,omitempty"`
 	} `json:"SchoolSchedule"`
 }
@@ -112,9 +118,11 @@ func (n *Neis) GetCalendar(year int, month time.Month) ([]Calendar, error) {
 		index := end.Day() - d.Day()
 
 		calendars[index] = Calendar{
-			Date:    d,
-			Name:    row.EventNm,
-			Content: row.EventCntnt,
+			Date:      d,
+			Name:      row.EventNm,
+			Content:   row.EventCntnt,
+			ClassTime: row.DghtCrseScNm,
+			Deduction: row.SbtrDdScNm,
 			Target: [6]bool{
 				row.OneGradeEventYn == "Y",
 				row.TwGradeEventYn == "Y",
