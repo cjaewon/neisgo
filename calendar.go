@@ -17,6 +17,13 @@ type Calendar struct {
 	Target [6]bool
 }
 
+func (c *Calendar) Text() string {
+	if c.Content == "" {
+		return fmt.Sprintf("[%s]", c.Name)
+	}
+	return fmt.Sprintf("[%s]\n%s", c.Name, c.Content)
+}
+
 type calendarSchema struct {
 	Schoolschedule []struct {
 		Head []struct {

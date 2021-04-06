@@ -1,31 +1,13 @@
 package neisgo
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
-	"html/template"
 	"io"
 	"net/http"
 	"net/url"
 	"reflect"
 	"time"
-)
-
-const (
-	mealTmpl = `
-{{ if .Breakfast }}
-[조식]
-{{ .Breakfast }}
-{{ end }}
-{{ if .Lunch }}
-[중식]
-{{ .Lunch }}
-{{ end }}
-{{ if .Dinner }}
-[석식]
-{{ .Dinner }}
-{{ end }}`
 )
 
 type MealTime struct {
@@ -42,20 +24,26 @@ type Meal struct {
 }
 
 // Text merges breakfast, lunch and dinner with a provided or default template
-func (m *Meal) Text() (string, error) {
-	tmpl := template.New("meal")
+func (m *Meal) Text() string {
+	var text string
 
-	tmpl, err := tmpl.Parse(mealTmpl)
-	if err != nil {
-		return "", err
+	if m.Breakfast != "" {
+		text += "[조식]\n" + m.Breakfast
+		if m.Lunch != "" || m.Dinner != "" {
+			text += "\n\n"
+		}
+	}
+	if m.Lunch != "" {
+		text += "[중식]\n" + m.Lunch
+		if m.Dinner != "" {
+			text += "\n\n"
+		}
+	}
+	if m.Dinner != "" {
+		text += "[석식]\n" + m.Dinner
 	}
 
-	b := bytes.NewBufferString("")
-	if err := tmpl.Execute(b, m); err != nil {
-		return "", err
-	}
-
-	return b.String(), nil
+	return text
 }
 
 type mealSchema struct {
@@ -138,17 +126,17 @@ func (n *Neis) GetMeal(start, end time.Time) ([]Meal, error) {
 
 		switch row.MmealScCode {
 		case "1":
-			meals[index].Breakfast = row.DdishNm
-			meals[index].Origin.Breakfast = row.OrplcInfo
-			meals[index].Ingredients.Breakfast = row.NtrInfo
+			meals[index].Breakfast = genPlainText(row.DdishNm)
+			meals[index].Origin.Breakfast = genPlainText(row.OrplcInfo)
+			meals[index].Ingredients.Breakfast = genPlainText(row.NtrInfo)
 		case "2":
-			meals[index].Lunch = row.DdishNm
-			meals[index].Origin.Lunch = row.OrplcInfo
-			meals[index].Ingredients.Lunch = row.NtrInfo
+			meals[index].Lunch = genPlainText(row.DdishNm)
+			meals[index].Origin.Lunch = genPlainText(row.OrplcInfo)
+			meals[index].Ingredients.Lunch = genPlainText(row.NtrInfo)
 		case "3":
-			meals[index].Dinner = row.DdishNm
-			meals[index].Origin.Dinner = row.OrplcInfo
-			meals[index].Ingredients.Dinner = row.NtrInfo
+			meals[index].Dinner = genPlainText(row.DdishNm)
+			meals[index].Origin.Dinner = genPlainText(row.OrplcInfo)
+			meals[index].Ingredients.Dinner = genPlainText(row.NtrInfo)
 		}
 	}
 
