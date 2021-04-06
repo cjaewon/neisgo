@@ -1,5 +1,6 @@
 package neisgo
 
+// Neis handles open neis api related
 type Neis struct {
 	apiKey string
 
@@ -7,7 +8,7 @@ type Neis struct {
 	region string
 }
 
-// New creates a Neis instance
+// New creates a new Neis instance
 func New(apiKey string) *Neis {
 	n := Neis{
 		apiKey: apiKey,
@@ -18,6 +19,6 @@ func New(apiKey string) *Neis {
 
 // Set sets a school which will use
 func (n *Neis) Set(region, code string) {
-	n.code = code
 	n.region = region
+	n.code = code
 }

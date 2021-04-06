@@ -10,20 +10,21 @@ import (
 	"time"
 )
 
-type MealTime struct {
+type mealTime struct {
 	Breakfast string
 	Lunch     string
 	Dinner    string
 }
 
+// Meal represents meal of the day
 type Meal struct {
 	Date        time.Time
-	Origin      MealTime
-	Ingredients MealTime
-	MealTime
+	Origin      mealTime
+	Ingredients mealTime
+	mealTime
 }
 
-// Text merges breakfast, lunch and dinner with a provided or default template
+// Text returns merged breakfast, lunch, and dinner
 func (m *Meal) Text() string {
 	var text string
 
@@ -74,8 +75,7 @@ type mealSchema struct {
 	} `json:"mealServiceDietInfo"`
 }
 
-// GetMeal gets meal data from neis
-// returns Meal type array of start to end date duration length
+// GetMeal gets meal data from neis,
 func (n *Neis) GetMeal(year int, month time.Month) ([]Meal, error) {
 	start := time.Date(year, month, 1, 0, 0, 0, 0, time.Now().Location())
 	end := time.Date(year, month+1, 0, 0, 0, 0, 0, time.Now().Location())

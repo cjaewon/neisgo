@@ -9,14 +9,20 @@ import (
 	"time"
 )
 
+// Calendar represents calendar of the day
 type Calendar struct {
-	Date    time.Time
-	Name    string
+	Date time.Time
+	Name string
+	// Content is usually blank
 	Content string
 
+	// Target is targeting school year of calendar
+	// if high school or middle school, then max length will 3 else 6
+	// Target 은 해당 일정이 대상으로하고 있는 학년을 나타냅니다.
 	Target [6]bool
 }
 
+// Text returns merged  name, content
 func (c *Calendar) Text() string {
 	if c.Content == "" {
 		return fmt.Sprintf("[%s]", c.Name)
@@ -56,6 +62,7 @@ type calendarSchema struct {
 	} `json:"SchoolSchedule"`
 }
 
+// GetCalendar gets calendar data from neis
 func (n *Neis) GetCalendar(year int, month time.Month) ([]Calendar, error) {
 	start := time.Date(year, month, 1, 0, 0, 0, 0, time.Now().Location())
 	end := time.Date(year, month+1, 0, 0, 0, 0, 0, time.Now().Location())

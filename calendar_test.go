@@ -29,13 +29,13 @@ func TestGetCalendar(t *testing.T) {
 	neis.Set("C10", "7150144")
 
 	for i, c := range cases {
-		meals, err := neis.GetMeal(c.year, c.month)
+		calendars, err := neis.GetCalendar(c.year, c.month)
 		if err != nil {
 			t.Fatal(err)
 		}
 
-		if len(meals) != c.len {
-			t.Fatalf("catched unexpected meals length, case %d", i)
+		if len(calendars) != c.len {
+			t.Fatalf("catched unexpected calendars length, case %d", i)
 		}
 	}
 }
