@@ -76,7 +76,11 @@ type mealSchema struct {
 
 // GetMeal gets meal data from neis
 // returns Meal type array of start to end date duration length
-func (n *Neis) GetMeal(start, end time.Time) ([]Meal, error) {
+func (n *Neis) GetMeal(year int, month time.Month) ([]Meal, error) {
+	start := time.Date(year, month, 1, 0, 0, 0, 0, time.Now().Location())
+	end := time.Date(year, month+1, 0, 0, 0, 0, 0, time.Now().Location())
+	duration := int(end.Sub(start).Hours()/24) + 1
+
 	q := url.Values{
 		"KEY":                []string{n.apiKey},
 		"Type":               []string{"json"},
@@ -99,8 +103,6 @@ func (n *Neis) GetMeal(start, end time.Time) ([]Meal, error) {
 	if err != nil {
 		return nil, err
 	}
-
-	duration := int(end.Sub(start).Hours()/24) + 1
 
 	var data mealSchema
 	var meals = make([]Meal, duration)
