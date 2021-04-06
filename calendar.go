@@ -22,8 +22,13 @@ type Calendar struct {
 	Target [6]bool
 }
 
+// IsZero returns true if c is the zero value
+func (c Calendar) IsZero() bool {
+	return c == (Calendar{})
+}
+
 // Text returns merged  name, content
-func (c *Calendar) Text() string {
+func (c Calendar) Text() string {
 	if c.Content == "" {
 		return fmt.Sprintf("[%s]", c.Name)
 	}
@@ -73,8 +78,8 @@ func (n *Neis) GetCalendar(year int, month time.Month) ([]Calendar, error) {
 		"Type":               []string{"json"},
 		"ATPT_OFCDC_SC_CODE": []string{n.region},
 		"SD_SCHUL_CODE":      []string{n.code},
-		"MLSV_FROM_YMD":      []string{start.Format("20060102")},
-		"MLSV_TO_YMD":        []string{end.Format("20060102")},
+		"AA_FROM_YMD":        []string{start.Format("20060102")},
+		"AA_TO_YMD":          []string{end.Format("20060102")},
 	}
 
 	url := fmt.Sprintf("https://open.neis.go.kr/hub/SchoolSchedule?%s", q.Encode())
@@ -104,8 +109,7 @@ func (n *Neis) GetCalendar(year int, month time.Month) ([]Calendar, error) {
 			return nil, err
 		}
 
-		first := time.Date(d.Year(), d.Month(), 1, 0, 0, 0, 0, d.Location())
-		index := (d.Day() - start.Day()) + (int(d.Month())-int(start.Month()))*first.AddDate(0, 1, -1).Day()
+		index := end.Day() - d.Day()
 
 		calendars[index] = Calendar{
 			Date:    d,

@@ -6,7 +6,6 @@ import (
 	"io"
 	"net/http"
 	"net/url"
-	"reflect"
 	"time"
 )
 
@@ -24,8 +23,13 @@ type Meal struct {
 	mealTime
 }
 
+// IsZero returns true if m is the zero value
+func (m Meal) IsZero() bool {
+	return m == (Meal{})
+}
+
 // Text returns merged breakfast, lunch, and dinner
-func (m *Meal) Text() string {
+func (m Meal) Text() string {
 	var text string
 
 	if m.Breakfast != "" {
@@ -117,10 +121,9 @@ func (n *Neis) GetMeal(year int, month time.Month) ([]Meal, error) {
 			return nil, err
 		}
 
-		first := time.Date(d.Year(), d.Month(), 1, 0, 0, 0, 0, d.Location())
-		index := (d.Day() - start.Day()) + (int(d.Month())-int(start.Month()))*first.AddDate(0, 1, -1).Day()
+		index := end.Day() - d.Day()
 
-		if reflect.ValueOf(meals[index]).IsZero() {
+		if meals[index].IsZero() {
 			meals[index] = Meal{
 				Date: d,
 			}
