@@ -108,7 +108,7 @@ func (n *Neis) GetCalendar(year int, month time.Month) ([]Calendar, error) {
 	if err := json.Unmarshal(b, &data); err != nil {
 		return nil, err
 	}
-
+	fmt.Println(data, 1234)
 	for _, row := range data.Schoolschedule[1].Row {
 		d, err := time.Parse("20060102", row.AaYmd)
 		if err != nil {
