@@ -34,6 +34,7 @@ func TestGetMeal(t *testing.T) {
 
 	for i, c := range cases {
 		meals, err := neis.GetMeal(c.year, c.month)
+
 		if err != nil {
 			t.Fatal(err)
 		}

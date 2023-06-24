@@ -56,7 +56,7 @@ type Meal struct {
 }
 ```
 
-## 일정 가져오기
+### 일정 가져오기
 ```go
 func main() {
   neis := neisgo.New(apiKey)
